@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.layers import Dense, Flatten, LSTM
 from tensorflow.keras.models import Sequential
 from tensorflow.keras import Model
 
@@ -12,6 +12,17 @@ def read_yearly():
     df = pd.read_csv(file, names=['year', 'mean SN',
                      'stddev', '#obs', 'prov?'], header=None, sep=';')
     return df
+
+
+def normalize_data(data: pd.DataFrame, data_col: str = "mean SN", norm_col: str = "norm SN"):
+    sn = data[data_col]
+    mean = pd.Series.mean(sn)
+    stddev = pd.Series.std(sn)
+    data[norm_col] = (sn-mean)/stddev
+
+
+def denormalize_data(data: pd.Series, mean: float, stddev: float):
+    return data*stddev+mean
 
 
 def make_train_sequences(data: pd.DataFrame, num_inputs: int = 22, num_preds: int = 11, data_col: str = "mean SN"):
@@ -37,6 +48,16 @@ def make_dense_model(cells: int = 32, num_inputs: int = 22, num_preds: int = 11)
     mod.add(Dense(cells))
     mod.add(Dense(num_preds))
     mod.build(input_shape=(None, num_inputs, 1))
+    mod.compile(loss='mae')
+    mod.summary()
+    return mod
+
+
+def make_lstm_model(cells: int = 32, num_inputs: int = 22, num_preds: int = 11):
+    mod = Sequential()
+    mod.add(LSTM(cells))
+    mod.add(Dense(num_preds))
+    mod.buils(input_shape=(None, num_inputs, 1))
     mod.compile(loss='mae')
     mod.summary()
     return mod
