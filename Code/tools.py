@@ -7,7 +7,8 @@ from tensorflow.keras import Model
 
 
 def read_yearly():
-    wd = Path.cwd()
+    ""
+    wd = Path(__file__).parent.absolute()
     file = Path(wd, '..', 'Data', 'SN_y_tot_V2.0.csv')
     df = pd.read_csv(file, names=['year', 'mean SN',
                      'stddev', '#obs', 'prov?'], header=None, sep=';')
