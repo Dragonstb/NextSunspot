@@ -161,7 +161,7 @@ def make_lstm_model(cells: int = 32, num_inputs: int = 22, num_preds: int = 11) 
     mod = Sequential()
     mod.add(LSTM(cells))
     mod.add(Dense(num_preds))
-    mod.buils(input_shape=(None, num_inputs, 1))
+    mod.build(input_shape=(None, num_inputs, 1))
     mod.compile(loss='mae')
     mod.summary()
     return mod
