@@ -1,9 +1,10 @@
 import numpy as np
 import numpy.typing as npt
+from typing import Tuple
 import pandas as pd
 
 
-def extrapolate(data: pd.DataFrame, from_year: float, period: int = 11, year_col="year", data_col="mean SN") -> npt.NDArray:
+def extrapolate(data: pd.DataFrame, from_year: float, period: int = 11, year_col="year", data_col="mean SN") -> Tuple[npt.NDArray, npt.NDArray]:
     """
     Simply forecasts a value by linearly extrapolating from the values one and two periods before.
 
@@ -25,8 +26,9 @@ def extrapolate(data: pd.DataFrame, from_year: float, period: int = 11, year_col
     Name of the column in the data frame containing the actual data that is used as input.
 
     ---
-    return: np.NDArray
-    extrapolated values. The length of the array matches the number specified in 'period'
+    return: np.NDArray, np.NDArray
+    Extrapolated values. The lengthes of the arrays matches the number specified in 'period'. First array are the dates for
+    which extrapolations were taken, and second array are the extrapolated values, respectively.
     """
     if period < 1:
         raise ValueError('period must be positive.')
@@ -39,4 +41,8 @@ def extrapolate(data: pd.DataFrame, from_year: float, period: int = 11, year_col
     two_periods_ago = np.array(
         data.iloc[pred_from_index-2*period:pred_to_index-2*period][data_col])
     extr = 2*one_period_ago - two_periods_ago
-    return extr
+
+    dt = years[pred_from_index-1] - years[pred_from_index-2]
+    outYears = np.arange(period) + 1
+    outYears = outYears*dt + years[pred_from_index-1]
+    return outYears, extr
